@@ -7,12 +7,11 @@ import {
   validateWithZodSchema,
 } from "./schemas";
 import db from "./db";
-import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser, getAuth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { error } from "console";
 import { uploadImage } from "./supabase";
-import { render } from "react-dom";
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -194,4 +193,25 @@ export const fetchProperties = async ({
     },
   });
   return properties;
+};
+
+export const fetchFavoriteId = async ({
+  propertyId,
+}: {
+  propertyId: string;
+}) => {
+  const user = await getAuthUser();
+  const favorite = await db.favorite.findFirst({
+    where: {
+      propertyId,
+      profileId: user.id,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return favorite?.id || null;
+};
+export const toggleFavoriteAction = async () => {
+  return { message: "toggle favorite" };
 };
