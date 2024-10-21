@@ -10,8 +10,8 @@ import db from "./db";
 import { auth, clerkClient, currentUser, getAuth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { error } from "console";
 import { uploadImage } from "./supabase";
+import { string } from "zod";
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -212,6 +212,33 @@ export const fetchFavoriteId = async ({
   });
   return favorite?.id || null;
 };
-export const toggleFavoriteAction = async () => {
-  return { message: "toggle favorite" };
+
+export const toggleFavoriteAction = async (prevState: {
+  propertyId: string;
+  favoriteId: string;
+  pathname: string;
+}) => {
+  const user = await getAuthUser();
+  const { propertyId, favoriteId, pathname } = prevState;
+
+  try {
+    if (favoriteId) {
+      await db.favorite.delete({
+        where: {
+          id: favoriteId,
+        },
+      });
+    } else {
+      await db.favorite.create({
+        data: {
+          propertyId,
+          profileId: user.id,
+        },
+      });
+    }
+    revalidatePath(pathname);
+    return { message: favoriteId ? "Removed from Faves" : "Added to Faves " };
+  } catch (error) {
+    return renderError(error);
+  }
 };
