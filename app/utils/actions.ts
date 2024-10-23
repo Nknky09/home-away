@@ -7,11 +7,10 @@ import {
   validateWithZodSchema,
 } from "./schemas";
 import db from "./db";
-import { auth, clerkClient, currentUser, getAuth } from "@clerk/nextjs/server";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { uploadImage } from "./supabase";
-import { string } from "zod";
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -30,7 +29,7 @@ const renderError = (error: unknown): { message: string } => {
 };
 
 export const createProfileAction = async (
-  prevState: any,
+  prevState: string,
   FormData: FormData
 ) => {
   try {
@@ -90,7 +89,6 @@ export const fetchProfile = async () => {
 };
 
 export const updateProfileAction = async (
-  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
@@ -114,7 +112,6 @@ export const updateProfileAction = async (
 };
 
 export const updateProfileImageAction = async (
-  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
@@ -139,7 +136,6 @@ export const updateProfileImageAction = async (
 };
 
 export const createPropertyAction = async (
-  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();

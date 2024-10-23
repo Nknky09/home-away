@@ -1,8 +1,7 @@
 import React from "react";
 import { categories } from "@/app/utils/categories";
-import { ScrollArea, Scrollbar } from "@radix-ui/react-scroll-area";
 import Link from "next/link";
-import { ScrollBar } from "../ui/scroll-area";
+import { ScrollBar, ScrollArea } from "../ui/scroll-area";
 
 function CategoriesList({
   category,

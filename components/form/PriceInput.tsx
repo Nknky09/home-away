@@ -1,6 +1,5 @@
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Prisma } from "@prisma/client";
 
 // const name = Prisma.PropertyScalarFieldEnum.price;
 

@@ -25,10 +25,11 @@ function NavSearch() {
   }, 500);
 
   useEffect(() => {
-    if (!searchParams.get("search")) {
+    const searchParamValue = searchParams.get("search");
+    if (!searchParamValue) {
       setSearch("");
     }
-  }, [searchParams.get("search")]);
+  }, [searchParams]);
 
   return (
     <Input

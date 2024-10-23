@@ -11,13 +11,7 @@ import { Button } from "../ui/button";
 import UserIcon from "./UserIcon";
 import { links } from "@/app/utils/links";
 import SignOutLink from "./SignOutLink";
-import {
-  SignedOut,
-  SignedIn,
-  SignInButton,
-  SignOutButton,
-  SignUpButton,
-} from "@clerk/nextjs";
+import { SignedOut, SignedIn, SignInButton, SignUpButton } from "@clerk/nextjs";
 
 function LinksDropDown() {
   return (
