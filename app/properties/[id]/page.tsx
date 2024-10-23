@@ -1,16 +1,21 @@
 import { fetchPropertyDetails } from "@/app/utils/actions";
 import FavoriteToggleButton from "@/components/card/FavoriteToggleButton";
 import PropertyRating from "@/components/card/PropertyRating";
+import BookingCalendar from "@/components/properties/BookingCalendar";
 import BreadCrumbs from "@/components/properties/BreadCrumbs";
 import ImageConatiner from "@/components/properties/ImageConatiner";
 import ShareButton from "@/components/properties/ShareButton";
 import { redirect } from "next/navigation";
+import PropertiesDetails from "@/components/properties/PropertiesDetails";
+import UserInfo from "@/components/properties/UserInfo";
 
 async function PropertiesDetailsPage({ params }: { params: { id: string } }) {
   const property = await fetchPropertyDetails(params.id);
   if (!property) redirect("/");
   const { baths, bedrooms, beds, guests } = property;
   const details = { baths, bedrooms, beds, guests };
+  const firstName = property.profile.firstName;
+  const profileImage = property.profile.profileImage;
 
   return (
     <section>
@@ -31,9 +36,12 @@ async function PropertiesDetailsPage({ params }: { params: { id: string } }) {
             <h1 className="text-xl font-bold">{property.name}</h1>
             <PropertyRating inPage propertyId={property.id} />
           </div>
+          <PropertiesDetails details={details} />
+          <UserInfo profile={{ firstName, profileImage }} />
         </div>
         <div className="lg:col-span-4 flex flex-col items-center">
           {/* calendar */}
+          <BookingCalendar />
         </div>
       </section>
     </section>
