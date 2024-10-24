@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Item } from "@radix-ui/react-dropdown-menu";
 
 const name = "category";
 

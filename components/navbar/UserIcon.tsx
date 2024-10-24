@@ -1,11 +1,18 @@
 import { LuUserCircle2 } from "react-icons/lu";
 import { fetchProfileImage } from "@/app/utils/actions";
+import Image from "next/image";
 
 async function UserIcon() {
   const profileImage = await fetchProfileImage();
   if (profileImage) {
     return (
-      <img src={profileImage} className="w-6 h-6 rounded-full object-cover" />
+      <Image
+        src={profileImage}
+        alt="User Profile Image"
+        className="w-6 h-6 rounded-full object-cover"
+        width={24}
+        height={24}
+      />
     );
   }
   return (
