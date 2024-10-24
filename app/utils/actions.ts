@@ -29,14 +29,13 @@ const renderError = (error: unknown): { message: string } => {
 };
 
 export const createProfileAction = async (
-  prevState: string,
-  FormData: FormData
-) => {
+  formData: FormData
+): Promise<{ message: string }> => {
   try {
     const user = await currentUser();
     if (!user) throw new Error("Please login to create a profile");
 
-    const rawData = Object.fromEntries(FormData);
+    const rawData = Object.fromEntries(formData);
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
 
     await db.profile.create({
@@ -88,8 +87,13 @@ export const fetchProfile = async () => {
   return profile;
 };
 
+interface ProfileState {
+  firstName: string;
+  lastName: string;
+  username: string;
+}
+
 export const updateProfileAction = async (
-  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
@@ -108,7 +112,9 @@ export const updateProfileAction = async (
     revalidatePath("/profile");
     return { message: "Profile updated successfully." };
   } catch (error) {
-    return renderError(error);
+    return {
+      message: error instanceof Error ? error.message : "An error occurred",
+    };
   }
 };
 
