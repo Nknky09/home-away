@@ -1,28 +1,27 @@
-import { MongoClient, GridFSBucket } from "mongodb";
-import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
 import { v4 as uuid } from "uuid";
 
-const mongoClient = new MongoClient(process.env.MONGO_URL as string);
-await mongoClient.connect();
-const db = mongoClient.db("home_away");
-
-const bucket = new GridFSBucket(db, { bucketName: "images" });
+const writeFileAsync = promisify(fs.writeFile);
 
 export const uploadImage = async (image: File): Promise<string> => {
+  const uploadDirectory = path.join(process.cwd(), "public", "images");
+
+  // Create the images directory if it doesn't exist
+  if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory, { recursive: true });
+  }
+
   const newName = `${uuid()}-${image.name}`;
+  const filePath = path.join(uploadDirectory, newName);
 
-  // Create a buffer from the file
-  const buffer = await image.arrayBuffer();
-  const readableStream = Readable.from(Buffer.from(buffer));
+  // Convert the image to buffer and write it to the filesystem
+  const buffer = Buffer.from(await image.arrayBuffer());
+  await writeFileAsync(filePath, buffer);
 
-  const uploadStream = bucket.openUploadStream(newName);
-
-  readableStream.pipe(uploadStream);
-
-  return new Promise<string>((resolve, reject) => {
-    uploadStream.on("finish", () => resolve(newName));
-    uploadStream.on("error", err => reject(err));
-  });
+  // Return the relative path for storing in the database
+  return `/images/${newName}`;
 };
 
 export const getImageUrl = (filename: string): string => {

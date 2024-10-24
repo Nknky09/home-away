@@ -1,44 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MongoClient, GridFSBucket } from "mongodb";
-
-const mongoClient = new MongoClient(process.env.MONGO_URL as string);
+import path from "path";
+import fs from "fs";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { filename: string } }
-): Promise<NextResponse> {
+) {
   const { filename } = params;
 
   if (!filename) {
     return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
   }
 
-  await mongoClient.connect();
-  const db = mongoClient.db("home_away");
-  const bucket = new GridFSBucket(db, { bucketName: "images" });
+  const filePath = path.join(process.cwd(), "public", "images", filename);
 
-  const downloadStream = bucket.openDownloadStreamByName(filename);
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    return NextResponse.json({ error: "File not found" }, { status: 404 });
+  }
 
-  const chunks: any[] = [];
-
-  return new Promise((resolve, reject) => {
-    downloadStream.on("data", chunk => {
-      chunks.push(chunk);
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    return new NextResponse(fileBuffer, {
+      headers: {
+        "Content-Type": "image/jpeg", // Adjust content type if needed
+      },
     });
-
-    downloadStream.on("error", err => {
-      reject(NextResponse.json({ error: "Image not found" }, { status: 404 }));
-    });
-
-    downloadStream.on("end", () => {
-      const imageBuffer = Buffer.concat(chunks);
-      resolve(
-        new NextResponse(imageBuffer, {
-          headers: {
-            "Content-Type": "image/jpeg",
-          },
-        })
-      );
-    });
-  });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to load image" },
+      { status: 500 }
+    );
+  }
 }

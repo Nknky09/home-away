@@ -10,7 +10,7 @@ import db from "./db";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { uploadImage, getImageUrl } from "../../utils/mongo";
+import { uploadImage } from "@/utils/mongo"; // Updated to use the new file system-based image upload logic.
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -26,6 +26,7 @@ const renderError = (error: unknown): { message: string } => {
   };
 };
 
+// **1. Profile Creation Logic**
 export const createProfileAction = async (
   formData: FormData
 ): Promise<{ message: string }> => {
@@ -36,14 +37,17 @@ export const createProfileAction = async (
     const rawData = Object.fromEntries(formData);
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
 
+    // Insert the new profile into MongoDB
     await db.profile.create({
       data: {
         clerkId: user.id,
         email: user.emailAddresses[0].emailAddress,
-        profileImage: user.imageUrl ?? "",
+        profileImage: user.imageUrl ?? "", // Default to Clerk's user image if present
         ...validatedFields,
       },
     });
+
+    // Update the Clerk metadata
     await clerkClient.users.updateUserMetadata(user.id, {
       privateMetadata: {
         hasProfile: true,
@@ -58,6 +62,65 @@ export const createProfileAction = async (
   redirect("/");
 };
 
+// **2. Update Profile Image Logic**
+export const updateProfileImageAction = async (
+  formData: FormData
+): Promise<{ message: string }> => {
+  const user = await getAuthUser();
+  try {
+    const image = formData.get("image") as File;
+
+    if (!image) throw new Error("No image provided");
+
+    // Upload the image to the filesystem and get the file path
+    const filePath = await uploadImage(image);
+
+    // Update MongoDB with the new profile image path
+    await db.profile.update({
+      where: { clerkId: user.id },
+      data: { profileImage: filePath },
+    });
+
+    // Revalidate the profile page
+    revalidatePath("/profile");
+
+    return { message: "Profile image updated successfully" };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+// **3. Property Creation Logic (with Image Upload)**
+export const createPropertyAction = async (
+  formData: FormData
+): Promise<{ message: string }> => {
+  const user = await getAuthUser();
+
+  try {
+    const rawData = Object.fromEntries(formData);
+    const file = formData.get("image") as File;
+
+    const validatedFields = validateWithZodSchema(propertySchema, rawData);
+    const validatedFile = validateWithZodSchema(imageSchema, { image: file });
+
+    // Upload the image to the filesystem
+    const fullPath = await uploadImage(validatedFile.image);
+
+    // Save the property with the image file path in MongoDB
+    await db.property.create({
+      data: {
+        ...validatedFields,
+        image: fullPath, // Store the path of the image
+        profileId: user.id,
+      },
+    });
+  } catch (error) {
+    return renderError(error);
+  }
+  redirect("/");
+};
+
+// **4. Fetch Profile Image Logic**
 export const fetchProfileImage = async () => {
   const user = await currentUser();
   if (!user) return null;
@@ -74,6 +137,7 @@ export const fetchProfileImage = async () => {
   return profile?.profileImage;
 };
 
+// **5. Fetch Profile Logic**
 export const fetchProfile = async () => {
   const user = await getAuthUser();
   const profile = await db.profile.findUnique({
@@ -85,84 +149,7 @@ export const fetchProfile = async () => {
   return profile;
 };
 
-interface ProfileState {
-  firstName: string;
-  lastName: string;
-  username: string;
-}
-
-export const updateProfileAction = async (
-  formData: FormData
-): Promise<{ message: string }> => {
-  const user = await getAuthUser();
-
-  try {
-    const rawData = Object.fromEntries(formData);
-    const validatedFields = validateWithZodSchema(profileSchema, rawData);
-
-    await db.profile.update({
-      where: {
-        clerkId: user.id,
-      },
-      data: validatedFields,
-    });
-
-    revalidatePath("/profile");
-    return { message: "Profile updated successfully." };
-  } catch (error) {
-    return {
-      message: error instanceof Error ? error.message : "An error occurred",
-    };
-  }
-};
-
-export const updateProfileImageAction = async (
-  formData: FormData
-): Promise<{ message: string }> => {
-  const user = await getAuthUser();
-  try {
-    const image = formData.get("image") as File;
-    const filePath = await uploadImage(image); // Store the image in the filesystem
-
-    // Update the profile image path in MongoDB
-    await db.profile.update({
-      where: { clerkId: user.id },
-      data: { profileImage: filePath },
-    });
-
-    revalidatePath("/profile");
-    return { message: "Profile image updated successfully" };
-  } catch (error) {
-    return renderError(error);
-  }
-};
-
-export const createPropertyAction = async (
-  formData: FormData
-): Promise<{ message: string }> => {
-  const user = await getAuthUser();
-
-  try {
-    const rawData = Object.fromEntries(formData);
-    const file = formData.get("image") as File;
-
-    const validatedFields = validateWithZodSchema(propertySchema, rawData);
-    const validatedFile = validateWithZodSchema(imageSchema, { image: file });
-    const fullPath = await uploadImage(validatedFile.image);
-
-    await db.property.create({
-      data: {
-        ...validatedFields,
-        image: fullPath,
-        profileId: user.id,
-      },
-    });
-  } catch (error) {
-    return renderError(error);
-  }
-  redirect("/");
-};
-
+// **6. Fetch Properties Logic**
 export const fetchProperties = async ({
   search = "",
   category,
@@ -193,6 +180,7 @@ export const fetchProperties = async ({
   return properties;
 };
 
+// **7. Fetch Favorite ID Logic**
 export const fetchFavoriteId = async ({
   propertyId,
 }: {
@@ -211,6 +199,7 @@ export const fetchFavoriteId = async ({
   return favorite?.id || null;
 };
 
+// **8. Toggle Favorite Logic**
 export const toggleFavoriteAction = async (prevState: {
   propertyId: string;
   favoriteId: string;
@@ -241,6 +230,7 @@ export const toggleFavoriteAction = async (prevState: {
   }
 };
 
+// **9. Fetch Favorites Logic**
 export const fetchFavorites = async () => {
   const user = await getAuthUser();
   const favorites = await db.favorite.findMany({
@@ -263,6 +253,7 @@ export const fetchFavorites = async () => {
   return favorites.map(favorite => favorite.property);
 };
 
+// **10. Fetch Property Details Logic**
 export const fetchPropertyDetails = async (id: string) => {
   return await db.property.findUnique({
     where: {
