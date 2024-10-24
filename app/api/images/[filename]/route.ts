@@ -6,7 +6,7 @@ const mongoClient = new MongoClient(process.env.MONGO_URL as string);
 export async function GET(
   req: NextRequest,
   { params }: { params: { filename: string } }
-) {
+): Promise<NextResponse> {
   const { filename } = params;
 
   if (!filename) {
