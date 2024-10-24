@@ -10,13 +10,11 @@ import db from "./db";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { uploadImage } from "./supabase";
+import { uploadImage, getImageUrl } from "../../utils/mongo";
 
 const getAuthUser = async () => {
   const user = await currentUser();
-  if (!user) {
-    throw new Error("You must be logged in to access this route");
-  }
+  if (!user) throw new Error("You must be logged in to access this route");
   if (!user.privateMetadata.hasProfile) redirect("/profile/create");
   return user;
 };
@@ -124,8 +122,8 @@ export const updateProfileImageAction = async (
   const user = await getAuthUser();
   try {
     const image = formData.get("image") as File;
-    const validatedFields = validateWithZodSchema(imageSchema, { image });
-    const fullPath = await uploadImage(validatedFields.image);
+    const fullPath = await uploadImage(image);
+    const imageUrl = getImageUrl(fullPath);
 
     await db.profile.update({
       where: {
@@ -190,9 +188,6 @@ export const fetchProperties = async ({
       country: true,
       price: true,
       image: true,
-    },
-    orderBy: {
-      createdAt: "desc",
     },
   });
   return properties;
