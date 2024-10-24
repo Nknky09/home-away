@@ -122,17 +122,14 @@ export const updateProfileImageAction = async (
   const user = await getAuthUser();
   try {
     const image = formData.get("image") as File;
-    const fullPath = await uploadImage(image);
-    const imageUrl = getImageUrl(fullPath);
+    const filePath = await uploadImage(image); // Store the image in the filesystem
 
+    // Update the profile image path in MongoDB
     await db.profile.update({
-      where: {
-        clerkId: user.id,
-      },
-      data: {
-        profileImage: fullPath,
-      },
+      where: { clerkId: user.id },
+      data: { profileImage: filePath },
     });
+
     revalidatePath("/profile");
     return { message: "Profile image updated successfully" };
   } catch (error) {
@@ -188,6 +185,9 @@ export const fetchProperties = async ({
       country: true,
       price: true,
       image: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
   return properties;
