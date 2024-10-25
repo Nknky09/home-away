@@ -10,7 +10,7 @@ import db from "./db";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { uploadImage } from "@/utils/mongo"; // Updated to use the new file system-based image upload logic.
+import { uploadImage } from "@/app/utils/mongo"; // Updated to use the new file system-based image upload logic.
 
 const getAuthUser = async () => {
   const user = await currentUser();
@@ -60,6 +60,29 @@ export const createProfileAction = async (
     };
   }
   redirect("/");
+};
+
+export const updateProfileAction = async (
+  fromData: FormData
+): Promise<{ message: string }> => {
+  const user = await getAuthUser();
+
+  try {
+    const rawData = Object.fromEntries(fromData);
+    const validatedFields = validateWithZodSchema(profileSchema, rawData);
+
+    await db.profile.update({
+      where: {
+        clerkId: user.id,
+      },
+      data: validatedFields,
+    });
+
+    revalidatePath("/profile");
+    return { message: "Profile updated successfully" };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
 // **2. Update Profile Image Logic**
