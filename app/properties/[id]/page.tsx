@@ -7,6 +7,5 @@ async function PropertyDetailsPage({ params }: { params: { id: string } }) {
   const { baths, bedrooms, beds, guests } = property;
   const details = { baths, bedrooms, beds, guests };
   return <div>PropertyDetailsPage</div>;
-  s;
 }
 export default PropertyDetailsPage;
