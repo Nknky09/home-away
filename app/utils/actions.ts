@@ -179,6 +179,17 @@ export const fetchProperties = async ({
   return properties;
 };
 
+export const fetchPropertyDetails = (id: string) => {
+  return db.property.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      profile: true,
+    },
+  });
+};
+
 export const fetchFavoriteId = async ({
   propertyId,
 }: {

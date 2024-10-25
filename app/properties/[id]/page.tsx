@@ -1,10 +1,12 @@
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
+import { fetchPropertyDetails } from "@/app/utils/actions";
+import { redirect } from "next/navigation";
 
-const DynamicMap = dynamic(
-  () => import("@/components/properties/PropertyMap"),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-[400px] w-full" />,
-  }
-);
+async function PropertyDetailsPage({ params }: { params: { id: string } }) {
+  const property = await fetchPropertyDetails(params.id);
+  if (!property) redirect("/");
+  const { baths, bedrooms, beds, guests } = property;
+  const details = { baths, bedrooms, beds, guests };
+  return <div>PropertyDetailsPage</div>;
+  s;
+}
+export default PropertyDetailsPage;

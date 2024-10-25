@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-function ImageConatiner({
+export function ImageContainer({
   mainImage,
   name,
 }: {
@@ -21,4 +21,4 @@ function ImageConatiner({
   );
 }
 
-export default ImageConatiner;
+export default ImageContainer;
