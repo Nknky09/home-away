@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  createReviewSchema,
   imageSchema,
   profileSchema,
   propertySchema,
@@ -11,6 +12,7 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { uploadImage } from "./supabase"; // Use Supabase for image upload
+import { error } from "console";
 
 // Fetch authenticated user
 const getAuthUser = async () => {
@@ -259,8 +261,26 @@ export const fetchFavorites = async () => {
   return favorites.map(favorite => favorite.property);
 };
 
-export const createReviewAction = async () => {
-  return { message: "create review" };
+export const createReviewAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const user = await getAuthUser();
+
+  try {
+    const rawData = Object.fromEntries(formData);
+    const validatedFields = validateWithZodSchema(createReviewSchema, rawData);
+    await db.review.create({
+      data: {
+        ...validatedFields,
+        profileId: user.id,
+      },
+    });
+
+    revalidatePath(`/properties/${validatedFields.propertyId}`);
+    return { message: "Review submitted successfully" };
+  } catch (error) {}
+  return renderError(error);
 };
 
 export const fetchPropertyReviews = async () => {
