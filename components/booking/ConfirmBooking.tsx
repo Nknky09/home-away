@@ -1,26 +1,24 @@
 "use client";
-
-import { useProperty } from "@/app/utils/store";
 import { SignInButton, useAuth } from "@clerk/nextjs";
-import { Button } from "../ui/button";
-import FormContainer from "../form/FormContainer";
-import { SubmitButton } from "../form/Buttons";
+import { Button } from "@/components/ui/button";
+import { useProperty } from "@/app/utils/store";
+import FormContainer from "@/components/form/FormContainer";
+import { SubmitButton } from "@/components/form/Buttons";
 import { createBookingAction } from "@/app/utils/actions";
 
 function ConfirmBooking() {
   const { userId } = useAuth();
   const { propertyId, range } = useProperty(state => state);
   const checkIn = range?.from as Date;
-  const checkOut = range?.from as Date;
-  if (!userId) {
+  const checkOut = range?.to as Date;
+  if (!userId)
     return (
       <SignInButton mode="modal">
         <Button type="button" className="w-full">
-          SIgn In to Complete Booking
+          Sign In to Complete Booking
         </Button>
       </SignInButton>
     );
-  }
 
   const createBooking = createBookingAction.bind(null, {
     propertyId,
@@ -35,5 +33,4 @@ function ConfirmBooking() {
     </section>
   );
 }
-
 export default ConfirmBooking;

@@ -388,14 +388,11 @@ export const createBookingAction = async (prevState: {
   checkOut: Date;
 }) => {
   const user = await getAuthUser();
+
   const { propertyId, checkIn, checkOut } = prevState;
   const property = await db.property.findUnique({
-    where: {
-      id: propertyId,
-    },
-    select: {
-      price: true,
-    },
+    where: { id: propertyId },
+    select: { price: true },
   });
   if (!property) {
     return { message: "Property not found" };
@@ -520,9 +517,28 @@ export async function deleteRentalAction(prevState: { propertyId: string }) {
       },
     });
 
-    revalidatePath("/rentals");
+    revalidatePath("/renatls");
     return { message: "Rental deleted successfully" };
   } catch (error) {
     return renderError(error);
   }
 }
+
+export const fetchRentalDetails = async (propertyId: string) => {
+  const user = await getAuthUser();
+
+  return db.property.findUnique({
+    where: {
+      id: propertyId,
+      profileId: user.id,
+    },
+  });
+};
+
+export const updatePropertyAction = async () => {
+  return { message: "update property action" };
+};
+
+export const updatePropertyImageAction = async () => {
+  return { mnessage: "update property image" };
+};

@@ -2,7 +2,7 @@ import EmptyList from "@/components/home/EmptyList";
 import CountryFlagAndName from "@/components/card/CountryFlagAndName";
 import Link from "next/link";
 
-import { formatDate, formatCurrency } from "../utils/format";
+import { formatDate, formatCurrency } from "@/app/utils/format";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
 
 import FormContainer from "@/components/form/FormContainer";
 import { IconButton } from "@/components/form/Buttons";
-import { fetchBookings, deleteBookingAction } from "../utils/actions";
+import { fetchBookings, deleteBookingAction } from "@/app/utils/actions";
 
 async function BookingsPage() {
   const bookings = await fetchBookings();
@@ -24,7 +24,7 @@ async function BookingsPage() {
   }
   return (
     <div className="mt-16">
-      <h4 className="mb-4 capitalize">total bookings: {bookings.length}</h4>
+      <h4 className="mb-4 capitalize">total bookings : {bookings.length}</h4>
       <Table>
         <TableCaption>A list of your recent bookings.</TableCaption>
         <TableHeader>
@@ -53,6 +53,9 @@ async function BookingsPage() {
                   >
                     {name}
                   </Link>
+                </TableCell>
+                <TableCell>
+                  <CountryFlagAndName countryCode={country} />
                 </TableCell>
                 <TableCell>{totalNights}</TableCell>
                 <TableCell>{formatCurrency(orderTotal)}</TableCell>
