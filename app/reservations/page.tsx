@@ -2,6 +2,7 @@ import { fetchReservations } from "@/app/utils/actions";
 import Link from "next/link";
 import EmptyList from "@/components/home/EmptyList";
 import CountryFlagAndName from "@/components/card/CountryFlagAndName";
+import GeneratePDFButton from "@/components/reservations/generatePDF";
 
 import { formatDate, formatCurrency } from "@/app/utils/format";
 import {
@@ -17,18 +18,22 @@ import Stats from "@/components/reservations/Stats";
 
 async function ReservationsPage() {
   const reservations = await fetchReservations();
+
   if (reservations.length === 0) {
     return <EmptyList />;
   }
+
   return (
     <>
       <Stats />
       <div className="mt-16">
         <h4 className="mb-4 capitalize">
-          total reservations : {reservations.length}
+          total bookings : {reservations.length}
         </h4>
+        {/* Render the GeneratePDFButton with reservations data */}
+
         <Table>
-          <TableCaption>A list of recent reservations</TableCaption>
+          <TableCaption>A list of recent bookings</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Property Name</TableHead>
@@ -68,8 +73,10 @@ async function ReservationsPage() {
             })}
           </TableBody>
         </Table>
+        <GeneratePDFButton reservations={reservations} />
       </div>
     </>
   );
 }
+
 export default ReservationsPage;
