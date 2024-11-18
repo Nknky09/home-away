@@ -1,3 +1,16 @@
+Note for task3
+admin
+kshido1@wgu.edu
+pw - kswgu1234!
+
+regular user
+kshidoapple@gmail.com
+pw - Kshido17!
+
+Stripe test pay card
+Visa 4242424242424242 Any 3 digits Any future date
+https://docs.stripe.com/testing
+
 ### Next App
 
 ```sh

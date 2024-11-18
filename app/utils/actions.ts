@@ -686,7 +686,7 @@ export const fetchChartsData = async () => {
 
 export const fetchReservationStats = async () => {
   const user = await getAuthUser();
-  const properties = await db.property.count({
+  const properties = await db.booking.count({
     where: {
       profileId: user.id,
     },
