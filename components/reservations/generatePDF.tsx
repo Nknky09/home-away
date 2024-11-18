@@ -5,7 +5,20 @@ import { formatDate, formatCurrency } from "@/app/utils/format";
 import { Button } from "../ui/button"; // Adjust path if needed
 import { FaFilePdf } from "react-icons/fa";
 
-function GeneratePDFButton({ reservations }) {
+interface Property {
+  name: string;
+  country: string;
+}
+
+interface Reservation {
+  orderTotal: number;
+  totalNights: number;
+  checkIn: Date; // Updated to match actual data type
+  checkOut: Date; // Updated to match actual data type
+  property: Property;
+}
+
+function GeneratePDFButton({ reservations }: { reservations: Reservation[] }) {
   const generatePDF = () => {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(10);
@@ -30,8 +43,13 @@ function GeneratePDFButton({ reservations }) {
       doc.text(country, 60, y);
       doc.text(String(totalNights), 90, y);
       doc.text(formatCurrency(orderTotal), 120, y);
-      doc.text(formatDate(checkIn), 150, y);
-      doc.text(formatDate(checkOut), 200, y);
+
+      const formattedCheckIn = formatDate(checkIn); // No conversion needed
+      const formattedCheckOut = formatDate(checkOut); // No conversion needed
+
+      doc.text(formattedCheckIn, 150, y);
+      doc.text(formattedCheckOut, 200, y);
+
       y += 10;
     });
 
