@@ -16,6 +16,8 @@ PDF install - npm install jspdf
 
 jest-dom - npm install @testing-library/jest-dom --save-dev
 
+jest test - npx jest **tests** --verbose
+
 ### Next App
 
 ```sh
