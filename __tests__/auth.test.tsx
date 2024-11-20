@@ -1,5 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { useAuth } from "@clerk/nextjs";
+import React from "react";
 
 jest.mock("@clerk/nextjs", () => ({
   useAuth: jest.fn(),

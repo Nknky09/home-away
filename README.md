@@ -11,6 +11,11 @@ Stripe test pay card
 Visa 4242424242424242 Any 3 digits Any future date
 https://docs.stripe.com/testing
 
+jest install - npm install --save-dev @types/jest
+PDF install - npm install jspdf
+
+jest-dom - npm install @testing-library/jest-dom --save-dev
+
 ### Next App
 
 ```sh

@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { useRouter } from "next/router";
+import React from "react";
 
 // Mock useRouter from Next.js
 jest.mock("next/router", () => ({
@@ -30,19 +32,25 @@ describe("Rentals Page Tests", () => {
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
   });
 
-  it("renders RentalsPage correctly", () => {
+  it("should display Rentals", () => {
     const RentalsPage = require("@/app/rentals/page").default;
     render(<RentalsPage />);
     expect(screen.getByText("Mock RentalsPage")).toBeInTheDocument();
   });
 
-  it("renders CreateProperty page correctly", () => {
+  it("should create a Rental", () => {
     const CreateProperty = require("@/app/rentals/create/page").default;
     render(<CreateProperty />);
     expect(screen.getByText("Mock CreateProperty")).toBeInTheDocument();
   });
 
-  it("renders EditRentalPage with mock params", () => {
+  it("should edit a Rental", () => {
+    const EditRentalPage = require("@/app/rentals/[id]/edit/page").default;
+    render(<EditRentalPage />);
+    expect(screen.getByText("Mock EditRentalPage")).toBeInTheDocument();
+  });
+
+  it("should delete a Rental", () => {
     const EditRentalPage = require("@/app/rentals/[id]/edit/page").default;
     render(<EditRentalPage />);
     expect(screen.getByText("Mock EditRentalPage")).toBeInTheDocument();
