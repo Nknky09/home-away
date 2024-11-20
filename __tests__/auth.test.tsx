@@ -13,9 +13,8 @@ jest.mock("@clerk/nextjs", () => ({
 }));
 
 describe("Authentication Tests", () => {
-  const logHTTPStatus = (testName: string, status: number) => {
-    console.log(`${testName} - HTTP Status: ${status}`);
-  };
+  const logHTTPStatus = (testName: string, status: number) =>
+    console.log(`Test: ${testName} | HTTP Status: ${status}`);
 
   it("renders SignInLink and calls handleLogin on click", () => {
     const handleLogin = jest.fn();
