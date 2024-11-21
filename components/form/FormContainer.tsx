@@ -1,7 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { actionFunction } from "@/app/utils/types";
 
@@ -13,19 +12,34 @@ function FormContainer({
   action,
   children,
 }: {
-  action: actionFunction;
+  action: (prevState: any, formData: FormData) => Promise<{ message: string }>;
   children: React.ReactNode;
 }) {
-  const [state, formAction] = useFormState(action, initialState);
   const { toast } = useToast();
+  const [state, setState] = useState(initialState);
 
-  useEffect(() => {
-    if (state.message) {
-      toast({ description: state.message });
+  // Form submission handler
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent default form behavior
+
+    const formData = new FormData(event.currentTarget); // Create FormData object from the form
+
+    try {
+      // Pass the current state and formData to the action function
+      const result = await action(state, formData);
+
+      // Update state and show success toast
+      setState(result);
+      if (result?.message) {
+        toast({ description: result.message });
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({ description: "An error occurred. Please try again." }); // Show error toast
     }
-  }, [state]);
+  };
 
-  return <form action={formAction}>{children}</form>;
+  return <form onSubmit={handleSubmit}>{children}</form>;
 }
 
 export default FormContainer;

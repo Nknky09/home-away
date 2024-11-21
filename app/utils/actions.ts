@@ -15,6 +15,7 @@ import { uploadImage } from "./supabase"; // Use Supabase for image upload
 import { error } from "console";
 import { calculateTotals } from "./calculateTotals";
 import { formatDate } from "./format";
+import { Profile } from "@prisma/client";
 
 // Fetch authenticated user
 const getAuthUser = async () => {
@@ -38,7 +39,10 @@ const renderError = (error: unknown): { message: string } => {
 };
 
 // Create profile logic
-export const createProfileAction = async (formData: FormData) => {
+export const createProfileAction = async (
+  prevState: any,
+  formData: FormData
+) => {
   try {
     const user = await currentUser();
     if (!user) throw new Error("Please login to create a profile");
@@ -54,9 +58,10 @@ export const createProfileAction = async (formData: FormData) => {
         ...validatedFields,
       },
     });
-
     await clerkClient.users.updateUserMetadata(user.id, {
-      privateMetadata: { hasProfile: true },
+      privateMetadata: {
+        hasProfile: true,
+      },
     });
   } catch (error) {
     return renderError(error);
@@ -81,7 +86,9 @@ export const fetchProfileImage = async () => {
 export const fetchProfile = async () => {
   const user = await getAuthUser();
   const profile = await db.profile.findUnique({
-    where: { clerkId: user.id },
+    where: {
+      clerkId: user.id,
+    },
   });
   if (!profile) redirect("/profile/create");
   return profile;
@@ -89,6 +96,7 @@ export const fetchProfile = async () => {
 
 // Update profile logic
 export const updateProfileAction = async (
+  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
@@ -98,7 +106,9 @@ export const updateProfileAction = async (
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
 
     await db.profile.update({
-      where: { clerkId: user.id },
+      where: {
+        clerkId: user.id,
+      },
       data: validatedFields,
     });
 
@@ -109,22 +119,24 @@ export const updateProfileAction = async (
   }
 };
 
-// Update profile image logic
 export const updateProfileImageAction = async (
+  prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
   try {
     const image = formData.get("image") as File;
     const validatedFields = validateWithZodSchema(imageSchema, { image });
-    const fullPath = await uploadImage(validatedFields.image); // Upload to Supabase
+    const fullPath = await uploadImage(validatedFields.image);
 
-    // Update MongoDB with the Supabase image URL
     await db.profile.update({
-      where: { clerkId: user.id },
-      data: { profileImage: fullPath },
+      where: {
+        clerkId: user.id,
+      },
+      data: {
+        profileImage: fullPath,
+      },
     });
-
     revalidatePath("/profile");
     return { message: "Profile image updated successfully" };
   } catch (error) {
