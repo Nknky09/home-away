@@ -17,7 +17,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "HomeAway",
+  title: "StayZen",
   description: "Feel at home, away from home.",
 };
 
